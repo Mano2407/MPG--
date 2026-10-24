@@ -15,7 +15,13 @@ from sklearn.neighbors import KNeighborsRegressor
 
 from pipeline import build_model_pipeline, RAW_NUMERIC, RAW_CATEGORICAL
 
-df = pd.read_csv("data/auto-mpg.csv")
+import os
+if os.path.exists("data/auto-mpg.csv"):
+    df = pd.read_csv("data/auto-mpg.csv")
+else:  # fallback if the data folder was not uploaded
+    df = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/mpg.csv")
+    df["origin"] = df["origin"].map({"usa": 1, "europe": 2, "japan": 3})
+    df = df.rename(columns={"model_year": "model year", "name": "car name"})
 df = df.dropna(subset=["mpg"])
 X, y = df[RAW_NUMERIC + RAW_CATEGORICAL], df["mpg"]
 X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42)
