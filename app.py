@@ -27,7 +27,13 @@ ORIGINS = {1: "🇺🇸 USA", 2: "🇪🇺 Europe", 3: "🇯🇵 Japan"}
 # ------------------------------------------------------------------ loading
 @st.cache_data
 def load_data():
-    d = pd.read_csv(BASE / "data" / "auto-mpg.csv")
+    p = BASE / "data" / "auto-mpg.csv"
+    if p.exists():
+        d = pd.read_csv(p)
+    else:  # fallback if the data folder was not uploaded
+        d = pd.read_csv("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/mpg.csv")
+        d["origin"] = d["origin"].map({"usa": 1, "europe": 2, "japan": 3})
+        d = d.rename(columns={"model_year": "model year", "name": "car name"})
     d["brand"] = d["car name"].apply(extract_brand)
     d["origin_name"] = d["origin"].map(ORIGINS)
     return d
